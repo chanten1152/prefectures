@@ -52,14 +52,18 @@ export default function App() {
     const prefCodes = selectedPrefectures.join(",");
     axios
       .get(
-        `https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=11362&prefCode=11,12`,
+        `https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=${prefCodes}&yearFrom=1980&yearTo=2020`,
         {
           headers: { "X-API-KEY": "MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V" },
         }
       )
       .then((res) => {
+        if (populationData.length === 0) {
+          return <div>Loading...</div>;
+        }
         setPopulationData(res.data.result)
         console.log(res.data.result);
+        console.log(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -94,23 +98,24 @@ export default function App() {
     }
     // console.log(`Checkbox ${prefCode} changed!`);
   };
-  // const options = {
-  //   title: {
-  //     text: "各都道府県の人口増減率",
-  //   },
-  //   xAxis: {
-  //     categories: Array.from({ length: 41 }, (_, i) => 1980 + i),
-  //   },
-  //   yAxis: {
-  //     title: {
-  //       text: "人口構成比（%）",
-  //     },
-  //   },
-  //   series: populationData.map((data) => ({
-  //     name: data.label,
-  //     data: data.data,
-  //   })),
-  // };
+  const chartOptions: Highcharts.Options = {
+    title: {
+      text: "各都道府県の人口増減率",
+    },
+    xAxis: {
+      categories: Array.from({ length: 41 }, (_, i) => (1980 + i).toString())
+    },
+    yAxis: {
+      title: {
+        text: "人口構成比（%）",
+      },
+    },
+    series: populationData.map((data) => ({
+      name: data.label,
+      data: data.data,
+      type: "line"
+    })),
+  };
   return (
     <>
       <h1>都道府県</h1>
@@ -130,7 +135,7 @@ export default function App() {
         </div>
       ))}
       <h2>人口数</h2>
-      <HighchartsReact highcharts={Highcharts} />
+      <HighchartsReact highcharts={Highcharts} options={chartOptions} />
     </>
   );
 }
