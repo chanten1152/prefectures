@@ -1,124 +1,136 @@
-import React, { Component } from 'react';
-import Highcharts from 'highcharts';
-import HighchartsReact from 'highcharts-react-official';
+import React, { useState, ReactNode, useEffect } from "react";
+import "./App.css";
+import axios, { AxiosResponse } from "axios";
+// import ReactDOM from "react-dom/client";
+// import CheckField from "./CheckField";
+import Highcharts from "highcharts";
+import HighchartsReact from "highcharts-react-official";
 
-class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      selected: Array(47).fill(false),
-      prefectures: {},
-      series: []
-    };
-    this._changeSelection = this._changeSelection.bind(this);
-  }
+// apiデータの型を決める
+type PrefecturesData = {
+  prefCode: number;
+  prefName: string;
+};
 
-  componentDidMount() {
-    // 47都道府県の一覧を取得
-    // API Doc: https://opendata.resas-portal.go.jp/docs/api/v1/prefectures.html
-    fetch('https://opendata.resas-portal.go.jp/api/v1/prefectures', {
-      headers: { 'X-API-KEY': 'MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V' }
-    })
-      .then(response => response.json())
-      .then(res => {
-        this.setState({ prefectures: res.result });
+type PopulationData = {
+  label: string;
+  data: number[];
+};
+
+type PopulationResponse = {
+  message: string;
+  result: {
+    label: string;
+    data: number[];
+  }[];
+};
+
+export default function App() {
+  // ステートの定義
+  const [prefectures, setPrefectures] = useState<PrefecturesData[]>([]);
+  const [populationData, setPopulationData] = useState<PopulationData[]>([]);
+  const [selectedPrefectures, setSelectedPrefectures] = useState<number[]>([]);
+
+  // 都道府県一覧を取得
+  useEffect(() => {
+    axios
+      .get("https://opendata.resas-portal.go.jp/api/v1/prefectures", {
+        headers: { "X-API-KEY": "MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V" },
+      })
+      .then((res) => {
+        setPrefectures(res.data.result);
+        console.log(res.data.result);
+        // console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
       });
-  }
+  }, []);
 
-  _changeSelection(index) {
-    const selected_copy = this.state.selected.slice();
-    // selectedの真偽値を反転
-    selected_copy[index] = !selected_copy[index];
-
-    if (!this.state.selected[index]) {
-      // チェックされていなかった場合はデータを取得
-      // API Doc: https://opendata.resas-portal.go.jp/docs/api/v1/population/sum/perYear.html
-      fetch(
-        `https://opendata.resas-portal.go.jp/api/v1/population/sum/perYear?cityCode=-&prefCode=${index +
-          1}`,
+  // 人口構成データの取得
+  useEffect(() => {
+    const prefCodes = selectedPrefectures.join(",");
+    axios
+      .get(
+        `https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=11362&prefCode=11,12`,
         {
-          headers: { 'X-API-KEY': 'MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V' }
+          headers: { "X-API-KEY": "MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V" },
         }
       )
-        .then(response => response.json())
-        .then(res => {
-          let tmp = [];
-          Object.keys(res.result.line.data).forEach(i => {
-            tmp.push(res.result.line.data[i].value);
-          });
-          const res_series = {
-            name: this.state.prefectures[index].prefName,
-            data: tmp
-          };
-          this.setState({
-            selected: selected_copy,
-            series: [...this.state.series, res_series]
-          });
-        });
-    } else {
-      const series_copy = this.state.series.slice();
-      // チェック済みの場合はseriesから削除
-      for (let i = 0; i < series_copy.length; i++) {
-        if (series_copy[i].name == this.state.prefectures[index].prefName) {
-          series_copy.splice(i, 1);
-        }
-      }
-      this.setState({
-        selected: selected_copy,
-        series: series_copy
+      .then((res) => {
+        setPopulationData(res.data.result)
+        console.log(res.data.result);
+      })
+      .catch((err) => {
+        console.log(err);
       });
+  }, [selectedPrefectures]);
+  // 動作確認用のクリックボタン処理
+  const onClickFetchData = () => {
+    axios
+      .get("https://opendata.resas-portal.go.jp/api/v1/prefectures", {
+        headers: { "X-API-KEY": "MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V" },
+      })
+      .then((res) => {
+        setPrefectures(res.data.result);
+        console.log(res.data.result);
+        console.log(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  // チェックボタンを押したら作動
+  const handleCheckbox = (prefCode: number) => {
+    const isChecked = selectedPrefectures.includes(prefCode);
+    if (isChecked) {
+      console.log("こっちが呼ばれた！");
+      setSelectedPrefectures((prevState) =>
+        prevState.filter((code) => code !== prefCode)
+      );
+    } else {
+      console.log("最後が呼ばれた！");
+      setSelectedPrefectures((prevState) => [...prevState, prefCode]);
     }
-  }
-
-  renderItem(props) {
-    return (
-      <div
-        key={props.prefCode}
-        style={{ margin: '5px', display: 'inline-block' }}
-      >
-        <input
-          type="checkbox"
-          checked={this.state.selected[props.prefCode - 1]}
-          onChange={() => this._changeSelection(props.prefCode - 1)}
-        />
-        {props.prefName}
-      </div>
-    );
-  }
-
-  render() {
-    const obj = this.state.prefectures;
-    const options = {
-      title: {
-        text: '人口増減率'
-      },
-      plotOptions: {
-        series: {
-          label: {
-            connectorAllowed: false
-          },
-          pointInterval: 5,
-          pointStart: 1965
-        }
-      },
-      series: this.state.series
-    };
-    return (
-      <div>
-        <h1>Highcharts React + RESAS API Demo</h1>
-        <p>
-          <a href="https://github.com/highcharts/highcharts-react">
-            Highcharts React
-          </a>
-        </p>
-        <p>
-          <a href="https://opendata.resas-portal.go.jp/">RESAS API</a>
-        </p>
-        {Object.keys(obj).map(i => this.renderItem(obj[i]))}
-        <HighchartsReact highcharts={Highcharts} options={options} />
-      </div>
-    );
-  }
+    // console.log(`Checkbox ${prefCode} changed!`);
+  };
+  // const options = {
+  //   title: {
+  //     text: "各都道府県の人口増減率",
+  //   },
+  //   xAxis: {
+  //     categories: Array.from({ length: 41 }, (_, i) => 1980 + i),
+  //   },
+  //   yAxis: {
+  //     title: {
+  //       text: "人口構成比（%）",
+  //     },
+  //   },
+  //   series: populationData.map((data) => ({
+  //     name: data.label,
+  //     data: data.data,
+  //   })),
+  // };
+  return (
+    <>
+      <h1>都道府県</h1>
+      <button onClick={onClickFetchData}>データ取得</button>
+      {prefectures.map((prefecture) => (
+        <div key={prefecture.prefCode}>
+          <input
+            type="checkbox"
+            id={`checkbox-${prefecture.prefCode}`}
+            name={prefecture.prefName}
+            value={prefecture.prefCode}
+            onChange={() => handleCheckbox(prefecture.prefCode)}
+          />
+          <label htmlFor={`checkbox-${prefecture.prefCode}`}>
+            {prefecture.prefName}
+          </label>
+        </div>
+      ))}
+      <h2>人口数</h2>
+      <HighchartsReact highcharts={Highcharts} />
+    </>
+  );
 }
-
-export default App;
