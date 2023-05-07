@@ -16,14 +16,6 @@ type PopulationData = {
   data: number[];
 };
 
-type PopulationResponse = {
-  message: string;
-  result: {
-    label: string;
-    data: number[];
-  }[];
-};
-
 export default function App() {
   // ステートの定義
   const [prefectures, setPrefectures] = useState<PrefecturesData[]>([]);
@@ -39,8 +31,6 @@ export default function App() {
       })
       .then((res) => {
         setPrefectures(res.data.result);
-        console.log(res.data.result);
-        // console.log(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -60,12 +50,7 @@ export default function App() {
         }
       )
       .then((res) => {
-        if (populationData.length === 0) {
-          return <div>Loading...</div>;
-        }
-        setPopulationData(res.data.result)
-        console.log(res.data.result);
-        console.log(res.data);
+        setPopulationData(res.data.result.data[0].data);
       })
       .catch((err) => {
         console.log(err);
@@ -74,25 +59,20 @@ export default function App() {
 
   // チェックボタンの操作
   const handleCheckbox = (prefCode: number) => {
+    // SPEC: チェックされた都道府県のcodeをselectedPrefecturesに入れる
     //       チェックが外された都道府県のcodeをselectedPrefecturesから外す
     const isChecked = selectedPrefectures.includes(prefCode);
     if (isChecked) {
-      console.log("こっちが呼ばれた！");
       setSelectedPrefectures((prevState) =>
         prevState.filter((code) => code !== prefCode)
       );
     } else {
-      console.log("最後が呼ばれた！");
       setSelectedPrefectures((prevState) => [...prevState, prefCode]);
     }
-    // console.log(`Checkbox ${prefCode} changed!`);
   };
   const chartOptions: Highcharts.Options = {
     title: {
       text: "各都道府県の人口増減率",
-    },
-    xAxis: {
-      categories: Array.from({ length: 41 }, (_, i) => (1980 + i).toString())
     },
     yAxis: {
       title: {
@@ -129,21 +109,21 @@ export default function App() {
       <div className="wrapper">
         <h2>都道府県</h2>
         <div className="prefecture__container">
-      {prefectures.map((prefecture) => (
+          {prefectures.map((prefecture) => (
             <div key={prefecture.prefCode} className="prefecture__item">
-          <input
+              <input
                 className="prefecture__input"
-            type="checkbox"
-            id={`checkbox-${prefecture.prefCode}`}
-            name={prefecture.prefName}
-            onChange={() => handleCheckbox(prefecture.prefCode)}
-          />
+                type="checkbox"
+                id={`checkbox-${prefecture.prefCode}`}
+                name={prefecture.prefName}
+                onChange={() => handleCheckbox(prefecture.prefCode)}
+              />
               <label className="prefecture__label">{prefecture.prefName}</label>
+            </div>
+          ))}
         </div>
-      ))}
-        </div>
-      <h2>人口数</h2>
-      <HighchartsReact highcharts={Highcharts} options={chartOptions} />
+        <h2>人口数</h2>
+        <HighchartsReact highcharts={Highcharts} options={chartOptions} />
       </div>
     </>
   );
