@@ -22,6 +22,13 @@ export default function App() {
   const [populationData, setPopulationData] = useState<PopulationData[]>([]);
   const [selectedPrefectures, setSelectedPrefectures] = useState<number[]>([]);
 
+  // 47都道府県を配列に格納
+  const allPrefectures = []
+  prefectures.map((prefecture) => {
+    allPrefectures.push(prefecture.prefName)
+  })
+  const newAllPrefectures = allPrefectures.filter((el, index) => allPrefectures.indexOf(el) === index)
+
   // 都道府県一覧を取得
   useEffect(() => {
     axios
@@ -40,10 +47,10 @@ export default function App() {
   // 人口構成データの取得
   useEffect(() => {
     // TODO: 複数の都道府県が正しく表示されるように修正する
-    const addAreas = selectedPrefectures.join("_,");
+    const addAreas = selectedPrefectures.join(",");
     axios
       .get(
-        `https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&addArea=${addAreas}`,
+        `https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=${addAreas}`,
         {
           // TODO: APIキーをenvファイルに格納してセキュリティ対策をする
           headers: { "X-API-KEY": "MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V" },
@@ -91,12 +98,8 @@ export default function App() {
     series: [
       //TODO: 47都道府県分mapでループ処理する.populationDataを使用する。
       {
-        name: "北海道",
-        data: [
-          5039206, 5171800, 5184287, 5338206, 5575989, 5679439, 5643647,
-          5692321, 5683062, 5627737, 5506419, 5381733, 5224614, 5016554,
-          4791592, 4546357, 4280427, 4004973,
-        ],
+        name: `${newAllPrefectures[selectedPrefectures[0]-1]}`,
+        data: populationData.map(item => item.value),
         type: "line",
       },
     ],
