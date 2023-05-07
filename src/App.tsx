@@ -61,13 +61,13 @@ export default function App() {
   const handleCheckbox = (prefCode: number) => {
     // SPEC: チェックされた都道府県のcodeをselectedPrefecturesに入れる
     //       チェックが外された都道府県のcodeをselectedPrefecturesから外す
-    const isChecked = selectedPrefectures.includes(prefCode);
+    const isChecked = !selectedPrefectures.includes(prefCode);
     if (isChecked) {
+      setSelectedPrefectures((prevState) => [...prevState, prefCode]);
+    } else {
       setSelectedPrefectures((prevState) =>
         prevState.filter((code) => code !== prefCode)
       );
-    } else {
-      setSelectedPrefectures((prevState) => [...prevState, prefCode]);
     }
   };
   const chartOptions: Highcharts.Options = {
