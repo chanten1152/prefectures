@@ -50,9 +50,10 @@ export default function App() {
   // 人口構成データの取得
   useEffect(() => {
     // TODO: 複数の都道府県が正しく表示されるように修正する
+    const addAreas = selectedPrefectures.join("_,");
     axios
       .get(
-        `https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=${prefCodes}&yearFrom=1980&yearTo=2020`,
+        `https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&addArea=${addAreas}`,
         {
           // TODO: APIキーをenvファイルに格納してセキュリティ対策をする
           headers: { "X-API-KEY": "MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V" },
