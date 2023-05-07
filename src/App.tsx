@@ -1,8 +1,6 @@
-import React, { useState, ReactNode, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
-import axios, { AxiosResponse } from "axios";
-// import ReactDOM from "react-dom/client";
-// import CheckField from "./CheckField";
+import axios from "axios";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 
@@ -69,22 +67,8 @@ export default function App() {
         console.log(err);
       });
   }, [selectedPrefectures]);
-  // 動作確認用のクリックボタン処理
-  const onClickFetchData = () => {
-    axios
-      .get("https://opendata.resas-portal.go.jp/api/v1/prefectures", {
-        headers: { "X-API-KEY": "MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V" },
-      })
-      .then((res) => {
-        setPrefectures(res.data.result);
-        console.log(res.data.result);
-        console.log(res.data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-  // チェックボタンを押したら作動
+
+  // チェックボタンの操作
   const handleCheckbox = (prefCode: number) => {
     const isChecked = selectedPrefectures.includes(prefCode);
     if (isChecked) {
