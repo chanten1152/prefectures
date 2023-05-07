@@ -12,8 +12,8 @@ type PrefecturesData = {
 };
 
 type PopulationData = {
-  label: string;
-  data: number[];
+  year: number;
+  value: string;
 };
 
 export default function App() {
