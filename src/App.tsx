@@ -98,11 +98,27 @@ export default function App() {
         text: "人口構成比（%）",
       },
     },
-    series: populationData.map((data) => ({
-      name: data.label,
-      data: data.data,
-      type: "line"
-    })),
+    plotOptions: {
+      series: {
+        label: {
+          connectorAllowed: false,
+        },
+        pointInterval: 5,
+        pointStart: 1960,
+      },
+    },
+    series: [
+      //TODO: 47都道府県分mapでループ処理する.populationDataを使用する。
+      {
+        name: "北海道",
+        data: [
+          5039206, 5171800, 5184287, 5338206, 5575989, 5679439, 5643647,
+          5692321, 5683062, 5627737, 5506419, 5381733, 5224614, 5016554,
+          4791592, 4546357, 4280427, 4004973,
+        ],
+        type: "line",
+      },
+    ],
   };
   return (
     <>
