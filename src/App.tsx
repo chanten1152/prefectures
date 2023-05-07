@@ -3,6 +3,7 @@ import "./App.css";
 import axios from "axios";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import "./App.scss";
 
 // SPEC: 各APIデータの型
 type PrefecturesData = {
@@ -105,24 +106,28 @@ export default function App() {
   };
   return (
     <>
-      <h1>都道府県</h1>
-      <button onClick={onClickFetchData}>データ取得</button>
+      <header className="header">
+        <h1 className="header__title">都道府県別の総人口推移グラフ</h1>
+      </header>
+      <div className="wrapper">
+        <h2>都道府県</h2>
+        <div className="prefecture__container">
       {prefectures.map((prefecture) => (
-        <div key={prefecture.prefCode}>
+            <div key={prefecture.prefCode} className="prefecture__item">
           <input
+                className="prefecture__input"
             type="checkbox"
             id={`checkbox-${prefecture.prefCode}`}
             name={prefecture.prefName}
-            value={prefecture.prefCode}
             onChange={() => handleCheckbox(prefecture.prefCode)}
           />
-          <label htmlFor={`checkbox-${prefecture.prefCode}`}>
-            {prefecture.prefName}
-          </label>
+              <label className="prefecture__label">{prefecture.prefName}</label>
         </div>
       ))}
+        </div>
       <h2>人口数</h2>
       <HighchartsReact highcharts={Highcharts} options={chartOptions} />
+      </div>
     </>
   );
 }
