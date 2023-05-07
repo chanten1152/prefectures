@@ -4,7 +4,7 @@ import axios from "axios";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 
-// apiデータの型を決める
+// SPEC: 各APIデータの型
 type PrefecturesData = {
   prefCode: number;
   prefName: string;
@@ -33,6 +33,7 @@ export default function App() {
   useEffect(() => {
     axios
       .get("https://opendata.resas-portal.go.jp/api/v1/prefectures", {
+        // TODO: APIキーをenvファイルに格納してセキュリティ対策をする
         headers: { "X-API-KEY": "MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V" },
       })
       .then((res) => {
@@ -47,11 +48,12 @@ export default function App() {
 
   // 人口構成データの取得
   useEffect(() => {
-    const prefCodes = selectedPrefectures.join(",");
+    // TODO: 複数の都道府県が正しく表示されるように修正する
     axios
       .get(
         `https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=${prefCodes}&yearFrom=1980&yearTo=2020`,
         {
+          // TODO: APIキーをenvファイルに格納してセキュリティ対策をする
           headers: { "X-API-KEY": "MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V" },
         }
       )
@@ -70,6 +72,7 @@ export default function App() {
 
   // チェックボタンの操作
   const handleCheckbox = (prefCode: number) => {
+    //       チェックが外された都道府県のcodeをselectedPrefecturesから外す
     const isChecked = selectedPrefectures.includes(prefCode);
     if (isChecked) {
       console.log("こっちが呼ばれた！");
