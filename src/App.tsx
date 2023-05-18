@@ -11,6 +11,7 @@ type PrefecturesData = {
   prefName: string;
 };
 
+
 type PopulationData = {
   year: number;
   value: string;
@@ -21,6 +22,7 @@ export default function App() {
   const [prefectures, setPrefectures] = useState<PrefecturesData[]>([]);
   const [populationData, setPopulationData] = useState<PopulationData[]>([]);
   const [selectedPrefectures, setSelectedPrefectures] = useState<number[]>([]);
+  let resultPrefecture = []
 
   // 47都道府県を配列に格納
   const allPrefectures = []
@@ -48,21 +50,34 @@ export default function App() {
   useEffect(() => {
     // TODO: 複数の都道府県が正しく表示されるように修正する
     const addAreas = selectedPrefectures.join(",");
-    axios
-      .get(
-        `https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=${addAreas}`,
-        {
-          // TODO: APIキーをenvファイルに格納してセキュリティ対策をする
-          headers: { "X-API-KEY": "MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V" },
-        }
-      )
-      .then((res) => {
-        setPopulationData(res.data.result.data[0].data);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [selectedPrefectures]);
+    for (let i = 0; i < selectedPrefectures.length; i++) {
+      axios
+        .get(
+          `https://opendata.resas-portal.go.jp/api/v1/population/composition/perYear?cityCode=-&prefCode=${selectedPrefectures[i]}`,
+          {
+            // TODO: APIキーをenvファイルに格納してセキュリティ対策をする
+            headers: { "X-API-KEY": "MeaGAz2tHIvBqKuGIDyvhXzTRteXOoXljZTOpz6V" },
+          }
+        )
+        .then((res) => {
+          // console.log(populationData, "first")
+          setPopulationData(res.data.result.data[0].data);
+          console.log(i, 'iの回数')
+          console.log(selectedPrefectures[i], 'selectoのiの回数')
+        })
+        .catch((err) => {
+          console.log(err);
+        })
+        .finally(() => {
+          resultPrefecture.push(populationData)
+        })
+      }
+    }, [selectedPrefectures]);
+    
+    resultPrefecture.push(populationData)
+  console.log(selectedPrefectures, 'selectessssssd')
+  console.log(resultPrefecture, 'resultの結果〜')
+
 
   // チェックボタンの操作
   const handleCheckbox = (prefCode: number) => {
@@ -122,6 +137,7 @@ export default function App() {
                 onChange={() => handleCheckbox(prefecture.prefCode)}
               />
               <label className="prefecture__label">{prefecture.prefName}</label>
+              {prefecture.prefCode}
             </div>
           ))}
         </div>
